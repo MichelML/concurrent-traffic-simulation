@@ -3,37 +3,34 @@
 
 // TO BE RUN WITH g++ -pthread flag
 
-void threadFunctionEven()
-{
-    std::this_thread::sleep_for(std::chrono::milliseconds(1)); // simulate work
-    std::cout << "Even thread\n";
+void threadFunctionEven() {
+  std::this_thread::sleep_for(std::chrono::milliseconds(1)); // simulate work
+  std::cout << "Even thread\n";
 }
 
 /* Student Task START */
-void threadFunctionOdd()
-{
-    std::this_thread::sleep_for(std::chrono::milliseconds(1)); // simulate work
-    std::cout << "Odd thread\n";
+void threadFunctionOdd() {
+  std::this_thread::sleep_for(std::chrono::milliseconds(1)); // simulate work
+  std::cout << "Odd thread\n";
 }
 /* Student Task END */
 
-int main()
-{
-    /* Student Task START */
-    for (int i = 0;i < 6;i++) {
-        if (i % 2 == 0) {
-            std::thread t(threadFunctionEven);
-            t.detach();
-        } else {
-            std::thread t(threadFunctionOdd);
-            t.detach();
-        }
+int main() {
+  /* Student Task START */
+  for (int i = 0; i < 6; i++) {
+    if (i % 2 == 0) {
+      std::thread t(threadFunctionEven);
+      t.detach();
+    } else {
+      std::thread t(threadFunctionOdd);
+      t.detach();
     }
-    /* Student Task END */
+  }
+  /* Student Task END */
 
-    // ensure that main does not return before the threads are finished
-    std::this_thread::sleep_for(std::chrono::milliseconds(100)); // simulate work
+  // ensure that main does not return before the threads are finished
+  std::this_thread::sleep_for(std::chrono::milliseconds(100)); // simulate work
 
-    std::cout << "End of main is reached" << std::endl;
-    return 0;
+  std::cout << "End of main is reached" << std::endl;
+  return 0;
 }
