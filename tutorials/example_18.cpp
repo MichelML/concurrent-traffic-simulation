@@ -11,7 +11,7 @@ int main()
     for (size_t i = 0; i < 10; ++i)
     {
         // create new thread from a Lambda
-        threads.emplace_back([&i]() {
+        threads.emplace_back([i = std::move(i)]() {
 
             // wait for certain amount of time
             std::this_thread::sleep_for(std::chrono::milliseconds(10 * i));
