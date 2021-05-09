@@ -1,6 +1,8 @@
 #include <iostream>
 #include <thread>
 
+// TO BE RUN WITH g++ -pthread flag
+
 void threadFunction()
 {
     std::this_thread::sleep_for(std::chrono::milliseconds(50)); // simulate work
