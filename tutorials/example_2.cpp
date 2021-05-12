@@ -16,31 +16,50 @@ private:
 
 class WaitingVehicles {
 public:
-  WaitingVehicles() {}
+  WaitingVehicles() : _numVehicles(0) {}
 
-  void printIDs() {
-    std::lock_guard<std::mutex> myLock(
-        _mutex); // lock is released when myLock goes out of scope
-    for (auto &v : _vehicles)
-      std::cout << "   Vehicle #" << v.getID() << " is now waiting in the queue"
-                << std::endl;
+  int getNumVehicles() {
+    std::lock_guard<std::mutex> uLock(_mutex);
+    return _numVehicles;
+  }
+
+  bool dataIsAvailable() {
+    std::lock_guard<std::mutex> myLock(_mutex);
+    return !_vehicles.empty();
+  }
+
+  Vehicle popBack() {
+    // perform vector modification under the lock
+    std::lock_guard<std::mutex> uLock(_mutex);
+
+    // remove last vector element from queue
+    Vehicle v = std::move(_vehicles.back());
+    _vehicles.pop_back();
+    --_numVehicles;
+
+    return v; // will not be copied due to return value optimization (RVO) in
+              // C++
   }
 
   void pushBack(Vehicle &&v) {
+    // simulate some work
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
     // perform vector modification under the lock
     std::lock_guard<std::mutex> uLock(_mutex);
+
+    // add vector to queue
     std::cout << "   Vehicle #" << v.getID() << " will be added to the queue"
               << std::endl;
     _vehicles.emplace_back(std::move(v));
-
-    // simulate some work
-    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    ++_numVehicles;
   }
 
 private:
   std::vector<Vehicle>
       _vehicles; // list of all vehicles waiting to enter this intersection
   std::mutex _mutex;
+  int _numVehicles;
 };
 
 int main() {
@@ -57,11 +76,25 @@ int main() {
         std::launch::async, &WaitingVehicles::pushBack, queue, std::move(v)));
   }
 
+  std::cout << "Collecting results..." << std::endl;
+  while (true) {
+    if (queue->dataIsAvailable()) {
+      Vehicle v = queue->popBack();
+      std::cout << "   Vehicle #" << v.getID()
+                << " has been removed from the queue" << std::endl;
+
+      if (queue->getNumVehicles() <= 0) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(200));
+        break;
+      }
+    }
+  }
+
   std::for_each(futures.begin(), futures.end(),
                 [](std::future<void> &ftr) { ftr.wait(); });
 
-  std::cout << "Collecting results..." << std::endl;
-  queue->printIDs();
+  std::cout << "Finished : " << queue->getNumVehicles()
+            << " vehicle(s) left in the queue" << std::endl;
 
   return 0;
 }
