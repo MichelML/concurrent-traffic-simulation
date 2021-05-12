@@ -1,67 +1,71 @@
-#include <algorithm>
 #include <future>
 #include <iostream>
 #include <mutex>
+#include <queue>
 #include <thread>
-#include <vector>
 
-class Vehicle {
+template <class T> class MessageQueue {
 public:
-  Vehicle(int id) : _id(id) {}
-  int getID() { return _id; }
+  T receive() {
+    // perform queue modification under the lock
+    std::unique_lock<std::mutex> uLock(_mutex);
+    _cond.wait(uLock, [this] {
+      return !_messages.empty();
+    }); // pass unique lock to condition variable
 
-private:
-  int _id;
-};
+    // remove last vector element from queue
+    T msg = std::move(_messages.back());
+    _messages.pop_back();
 
-class WaitingVehicles {
-public:
-  WaitingVehicles() {}
-
-  void printIDs() {
-    std::lock_guard<std::mutex> myLock(
-        _mutex); // lock is released when myLock goes out of scope
-    for (auto &v : _vehicles)
-      std::cout << "   Vehicle #" << v.getID() << " is now waiting in the queue"
-                << std::endl;
+    return msg; // will not be copied due to return value optimization (RVO) in
+                // C++
   }
 
-  void pushBack(Vehicle &&v) {
+  void send(T &&msg) {
+    // simulate some work
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
     // perform vector modification under the lock
     std::lock_guard<std::mutex> uLock(_mutex);
-    std::cout << "   Vehicle #" << v.getID() << " will be added to the queue"
-              << std::endl;
-    _vehicles.emplace_back(std::move(v));
 
-    // simulate some work
-    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    // add vector to queue
+    std::cout << "   Message " << msg << " has been sent to the queue"
+              << std::endl;
+    _messages.push_back(std::move(msg));
+    _cond.notify_one(); // notify client after pushing new Vehicle into vector
   }
 
 private:
-  std::vector<Vehicle>
-      _vehicles; // list of all vehicles waiting to enter this intersection
   std::mutex _mutex;
+  std::condition_variable _cond;
+  std::deque<T> _messages;
 };
 
 int main() {
   // create monitor object as a shared pointer to enable access by multiple
   // threads
-  std::shared_ptr<WaitingVehicles> queue(new WaitingVehicles);
+  std::shared_ptr<MessageQueue<int>> queue(new MessageQueue<int>);
 
   std::cout << "Spawning threads..." << std::endl;
   std::vector<std::future<void>> futures;
   for (int i = 0; i < 10; ++i) {
-    // create a new Vehicle instance and move it into the queue
-    Vehicle v(i);
-    futures.emplace_back(std::async(
-        std::launch::async, &WaitingVehicles::pushBack, queue, std::move(v)));
+    int message = i;
+    futures.emplace_back(std::async(std::launch::async,
+                                    &MessageQueue<int>::send, queue,
+                                    std::move(message)));
+  }
+
+  std::cout << "Collecting results..." << std::endl;
+  while (true) {
+    int message = queue->receive();
+    std::cout << "   Message #" << message << " has been removed from the queue"
+              << std::endl;
   }
 
   std::for_each(futures.begin(), futures.end(),
                 [](std::future<void> &ftr) { ftr.wait(); });
 
-  std::cout << "Collecting results..." << std::endl;
-  queue->printIDs();
+  std::cout << "Finished!" << std::endl;
 
   return 0;
 }
