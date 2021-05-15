@@ -6,26 +6,29 @@
 
 /* Implementation of class "MessageQueue" */
 
-/*
-template <typename T>
-T MessageQueue<T>::receive()
-{
-    // FP.5a : The method receive should use std::unique_lock<std::mutex> and
-_condition.wait()
-    // to wait for and receive new messages and pull them from the queue using
-move semantics.
-    // The received object should then be returned by the receive function.
+template <typename T> T MessageQueue<T>::receive() {
+  //     // FP.5a : The method receive should use std::unique_lock<std::mutex>
+  //     and
+  // _condition.wait()
+  //     // to wait for and receive new messages and pull them from the queue
+  //     using
+  // move semantics.
+  //     // The received object should then be returned by the receive function.
 }
 
-template <typename T>
-void MessageQueue<T>::send(T &&msg)
-{
-    // FP.4a : The method send should use the mechanisms
-std::lock_guard<std::mutex>
-    // as well as _condition.notify_one() to add a new message to the queue and
-afterwards send a notification.
+template <typename T> void MessageQueue<T>::send(T &&msg) {
+  // wait one ms
+  std::this_thread::sleep_for(std::chrono::milliseconds(1));
+
+  // perform vector modification under the lock
+  std::lock_guard<std::mutex> uLock(_mut);
+
+  // add message to queue
+  std::cout << "   Message " << msg << " has been sent to the queue"
+            << std::endl;
+  _queue.push_back(std::move(msg));
+  _cond.notify_one(); // notify client after pushing new Vehicle into vector
 }
-*/
 
 /* Implementation of class "TrafficLight" */
 
@@ -69,5 +72,6 @@ void TrafficLight::cycleThroughPhases() {
 
     // notify state has changed
     _condition.notify_one();
+    _messageQueue.send(std::move(_currentPhase));
   }
 }
