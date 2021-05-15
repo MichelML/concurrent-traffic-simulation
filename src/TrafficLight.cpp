@@ -29,8 +29,6 @@ template <typename T> void MessageQueue<T>::send(T &&msg) {
   std::lock_guard<std::mutex> uLock(_mut);
 
   // add message to queue
-  std::cout << "   Message " << msg << " has been sent to the queue"
-            << std::endl;
   _queue.push_back(std::move(msg));
   _cond.notify_one(); // notify client after pushing new Vehicle into vector
 }
@@ -38,6 +36,7 @@ template <typename T> void MessageQueue<T>::send(T &&msg) {
 /* Implementation of class "TrafficLight" */
 
 TrafficLight::TrafficLight() { _currentPhase = TrafficLightPhase::red; }
+TrafficLight::~TrafficLight() {}
 
 void TrafficLight::waitForGreen() {
   // FP.5b : add the implementation of the method waitForGreen, in which an
@@ -58,7 +57,7 @@ void TrafficLight::simulate() {
   // started in a thread when the public method „simulate“ is called. To do
   // this, use the thread queue in the base class.
   threads.emplace_back(
-      std::async(&TrafficLight::cycleThroughPhases, std::move(this)));
+      std::thread(&TrafficLight::cycleThroughPhases, std::move(this)));
 }
 
 void TrafficLight::cycleThroughPhases() {
