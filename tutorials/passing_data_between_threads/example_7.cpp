@@ -27,7 +27,8 @@ int main() {
   std::vector<std::future<void>> futures;
   int nLoops = 10, nThreads = 5;
   for (int i = 0; i < nThreads; ++i) {
-    futures.emplace_back(std::async(std::launch::async, workerFunction, nLoops));
+    futures.emplace_back(
+        std::async(std::launch::async, workerFunction, nLoops));
   }
 
   // wait for tasks to complete
