@@ -21,6 +21,7 @@ public:
 private:
 };
 
+enum TrafficLightPhase { red, green };
 class TrafficLight : public TrafficObject {
 public:
   // constructor / desctructor
@@ -28,7 +29,7 @@ public:
   ~TrafficLight();
 
   // getters/setters
-  enum TrafficLightPhase { red, green };
+
   // typical behaviour methods
   void waitForGreen();
   void simulate();
