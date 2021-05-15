@@ -18,7 +18,7 @@ class Vehicle;
 
 template <class T> class MessageQueue {
 public:
-  void receive();
+  T receive();
   void send(T &&msg);
 
 private:
