@@ -22,9 +22,6 @@ template <typename T> T MessageQueue<T>::receive() {
 }
 
 template <typename T> void MessageQueue<T>::send(T &&msg) {
-  // wait one ms
-  std::this_thread::sleep_for(std::chrono::milliseconds(1));
-
   // perform vector modification under the lock
   std::lock_guard<std::mutex> uLock(_mut);
 
@@ -68,16 +65,14 @@ void TrafficLight::cycleThroughPhases() {
     // perform work under the lock
     std::lock_guard<std::mutex> uLock(_mutex);
 
-    // Cycle duration is a value between 4 and 6 seconds
+    // Make a trafficlight phase duration between 4 and 6 seconds
+    // and switch to new state once it's done
+    int trafficLightPhaseDuration = std::rand() % (6000 - 4000 + 1);
     std::this_thread::sleep_for(
-        std::chrono::milliseconds(std::rand() % (6000 - 4000 + 1)));
-
-    // Switch to new state
-    if (_currentPhase == TrafficLightPhase::red) {
-      _currentPhase = TrafficLightPhase::green;
-    } else {
-      _currentPhase = TrafficLightPhase::red;
-    }
+        std::chrono::milliseconds(trafficLightPhaseDuration));
+    _currentPhase = _currentPhase == TrafficLightPhase::red
+                        ? TrafficLightPhase::green
+                        : TrafficLightPhase::red;
 
     // notify state has changed
     _condition.notify_one();
