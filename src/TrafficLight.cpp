@@ -58,24 +58,32 @@ void TrafficLight::simulate() {
 }
 
 void TrafficLight::cycleThroughPhases() {
+  std::lock_guard<std::mutex> uLock(_mutex);
+
+  // Make a trafficlight phase duration between 4 and 6 seconds
+  // and switch to new state once it's done
+  long cycleDuration =
+      std::rand() %
+      (6000 - 4000 + 1); // duration of a single simulation cycle in ms
+  std::chrono::time_point<std::chrono::system_clock> lastUpdate;
+  lastUpdate = std::chrono::system_clock::now();
+
   while (true) {
-    // wait for 1 ms between cycle
     std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
-    // perform work under the lock
-    std::lock_guard<std::mutex> uLock(_mutex);
+    long timeSinceLastUpdate =
+        std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::system_clock::now() - lastUpdate)
+            .count();
 
-    // Make a trafficlight phase duration between 4 and 6 seconds
-    // and switch to new state once it's done
-    int trafficLightPhaseDuration = std::rand() % (6000 - 4000 + 1);
-    std::this_thread::sleep_for(
-        std::chrono::milliseconds(trafficLightPhaseDuration));
-    _currentPhase = _currentPhase == TrafficLightPhase::red
-                        ? TrafficLightPhase::green
-                        : TrafficLightPhase::red;
+    if (timeSinceLastUpdate >= cycleDuration) {
+      _currentPhase = _currentPhase == TrafficLightPhase::red
+                          ? TrafficLightPhase::green
+                          : TrafficLightPhase::red;
 
-    // notify state has changed
-    _condition.notify_one();
-    _messageQueue.send(std::move(_currentPhase));
+      _condition.notify_one();
+      _messageQueue.send(std::move(_currentPhase));
+      lastUpdate = std::chrono::system_clock::now();
+    }
   }
 }

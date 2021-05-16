@@ -6,42 +6,6 @@
 
 #IncludeRegexTransform: 
 
-/home/michelml/udacity_cpp/CppND-Program-a-Concurrent-Traffic-Simulation/src/Intersection.cpp
-chrono
--
-future
--
-iostream
--
-random
--
-thread
--
-Intersection.h
-/home/michelml/udacity_cpp/CppND-Program-a-Concurrent-Traffic-Simulation/src/Intersection.h
-Street.h
-/home/michelml/udacity_cpp/CppND-Program-a-Concurrent-Traffic-Simulation/src/Street.h
-Vehicle.h
-/home/michelml/udacity_cpp/CppND-Program-a-Concurrent-Traffic-Simulation/src/Vehicle.h
-
-/home/michelml/udacity_cpp/CppND-Program-a-Concurrent-Traffic-Simulation/src/Intersection.h
-TrafficLight.h
-/home/michelml/udacity_cpp/CppND-Program-a-Concurrent-Traffic-Simulation/src/TrafficLight.h
-TrafficObject.h
-/home/michelml/udacity_cpp/CppND-Program-a-Concurrent-Traffic-Simulation/src/TrafficObject.h
-future
--
-memory
--
-mutex
--
-vector
--
-
-/home/michelml/udacity_cpp/CppND-Program-a-Concurrent-Traffic-Simulation/src/Street.h
-TrafficObject.h
-/home/michelml/udacity_cpp/CppND-Program-a-Concurrent-Traffic-Simulation/src/TrafficObject.h
-
 /home/michelml/udacity_cpp/CppND-Program-a-Concurrent-Traffic-Simulation/src/TrafficLight.cpp
 TrafficLight.h
 /home/michelml/udacity_cpp/CppND-Program-a-Concurrent-Traffic-Simulation/src/TrafficLight.h
@@ -71,8 +35,4 @@ thread
 -
 vector
 -
-
-/home/michelml/udacity_cpp/CppND-Program-a-Concurrent-Traffic-Simulation/src/Vehicle.h
-TrafficObject.h
-/home/michelml/udacity_cpp/CppND-Program-a-Concurrent-Traffic-Simulation/src/TrafficObject.h
 
