@@ -62,7 +62,8 @@ void TrafficLight::cycleThroughPhases() {
 
   // Make a trafficlight phase duration between 4 and 6 seconds
   // and switch to new state once it's done
-  long cycleDuration = 4000 + rand() % 2000; // duration of a single simulation cycle in ms
+  long cycleDuration =
+      4000 + rand() % 2000; // duration of a single simulation cycle in ms
   std::chrono::time_point<std::chrono::system_clock> lastUpdate;
   lastUpdate = std::chrono::system_clock::now();
 
